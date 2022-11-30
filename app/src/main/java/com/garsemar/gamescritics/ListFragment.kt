@@ -2,20 +2,24 @@ package com.garsemar.gamescritics
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.garsemar.gamescritics.databinding.FragmentListBinding
 import com.garsemar.gamescritics.databinding.ItemUserBinding
+import kotlinx.parcelize.Parcelize
 
-data class User(val id: Long, var name: String, var url: String)
+@Parcelize
+data class User(val id: Long, var name: String, var url: String): Parcelable
 
-class ListFragment : Fragment() {
+class ListFragment : Fragment(), OnClickListener {
 
     private lateinit var userAdapter: UserAdapter
     private lateinit var linearLayoutManager: RecyclerView.LayoutManager
@@ -31,7 +35,7 @@ class ListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        userAdapter = UserAdapter(getUsers())
+        userAdapter = UserAdapter(getUsers(), this)
         linearLayoutManager = LinearLayoutManager(context)
 
         binding.recyclerView.apply {
@@ -50,13 +54,29 @@ class ListFragment : Fragment() {
         return users
     }
 
+    override fun onClick(user: User) {
+        parentFragmentManager.setFragmentResult(
+            "User", bundleOf("user" to user)
+        )
+        parentFragmentManager.beginTransaction().apply {
+            replace(R.id.fragmentContainerView, DetailFragment())
+            setReorderingAllowed(true)
+            addToBackStack(null)
+            commit()
+        }
+    }
 }
 
-class UserAdapter(private val users: List<User>): RecyclerView.Adapter<UserAdapter.ViewHolder>() {
+class UserAdapter(private val users: List<User>, private val listener: OnClickListener): RecyclerView.Adapter<UserAdapter.ViewHolder>() {
     private lateinit var context: Context
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view){
         val binding = ItemUserBinding.bind(view)
+        fun setListener(user: User){
+            binding.root.setOnClickListener {
+                listener.onClick(user)
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -72,6 +92,7 @@ class UserAdapter(private val users: List<User>): RecyclerView.Adapter<UserAdapt
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val user = users[position]
         with(holder){
+            setListener(user)
             binding.name.text = user.name
             binding.order.text = user.id.toString()
             Glide.with(context)
