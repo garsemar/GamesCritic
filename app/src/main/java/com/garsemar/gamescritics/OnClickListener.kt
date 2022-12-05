@@ -1,5 +1,5 @@
 package com.garsemar.gamescritics
 
 interface OnClickListener {
-    fun onClick(user: User)
+    fun onClick(games: Game)
 }

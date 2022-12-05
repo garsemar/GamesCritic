@@ -1,5 +1,6 @@
 package com.garsemar.gamescritics
 
+import android.content.ClipDescription
 import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
@@ -17,7 +18,9 @@ import com.garsemar.gamescritics.databinding.ItemUserBinding
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class User(val id: Long, var name: String, var url: String): Parcelable
+data class Game(val id: Long, var title: String, val description: String, val releaseDate: String, val rate: Double, var img: String): Parcelable
+
+lateinit var api: Api
 
 class ListFragment : Fragment(), OnClickListener {
 
@@ -38,6 +41,8 @@ class ListFragment : Fragment(), OnClickListener {
         userAdapter = UserAdapter(getUsers(), this)
         linearLayoutManager = LinearLayoutManager(context)
 
+        api = Api()
+
         binding.recyclerView.apply {
             setHasFixedSize(true) //Optimitza el rendiment de l’app
             layoutManager = linearLayoutManager
@@ -46,17 +51,14 @@ class ListFragment : Fragment(), OnClickListener {
     }
 
 
-    private fun getUsers(): MutableList<User>{
-        val users = mutableListOf<User>()
-        users.add(User(1, "Nom", "https://okdiario.com/img/2020/02/29/focas.jpg"))
-        users.add(User(2, "Nom2", "https://okdiario.com/img/2020/02/29/focas.jpg"))
-        users.add(User(3, "Nom3", "https://okdiario.com/img/2020/02/29/focas.jpg"))
-        return users
+    private fun getUsers(): List<Game> {
+        val games = api.getApi()
+        return games
     }
 
-    override fun onClick(user: User) {
+    override fun onClick(games: Game) {
         parentFragmentManager.setFragmentResult(
-            "User", bundleOf("user" to user)
+            "Games", bundleOf("games" to games)
         )
         parentFragmentManager.beginTransaction().apply {
             replace(R.id.fragmentContainerView, DetailFragment())
@@ -67,14 +69,14 @@ class ListFragment : Fragment(), OnClickListener {
     }
 }
 
-class UserAdapter(private val users: List<User>, private val listener: OnClickListener): RecyclerView.Adapter<UserAdapter.ViewHolder>() {
+class UserAdapter(private val games: List<Game>, private val listener: OnClickListener): RecyclerView.Adapter<UserAdapter.ViewHolder>() {
     private lateinit var context: Context
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view){
         val binding = ItemUserBinding.bind(view)
-        fun setListener(user: User){
+        fun setListener(games: Game){
             binding.root.setOnClickListener {
-                listener.onClick(user)
+                listener.onClick(games)
             }
         }
     }
@@ -86,17 +88,17 @@ class UserAdapter(private val users: List<User>, private val listener: OnClickLi
     }
 
     override fun getItemCount(): Int {
-        return users.size
+        return games.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val user = users[position]
+        val game = games[position]
         with(holder){
-            setListener(user)
-            binding.name.text = user.name
-            binding.order.text = user.id.toString()
+            setListener(game)
+            binding.name.text = game.title
+            binding.order.text = game.id.toString()
             Glide.with(context)
-                .load(user.url)
+                .load(game.img)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .centerCrop()
                 .circleCrop()

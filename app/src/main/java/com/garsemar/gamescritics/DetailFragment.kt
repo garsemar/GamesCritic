@@ -26,10 +26,10 @@ class DetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        parentFragmentManager.setFragmentResultListener("User", this
+        parentFragmentManager.setFragmentResultListener("Games", this
         ) { _: String, result: Bundle ->
-            val result2: User = result.get(("user")) as User
-            binding.textView.text = result2.name
+            val result2: Game = result.get(("games")) as Game
+            binding.textView2.text = result2.name
         }
 
     }
