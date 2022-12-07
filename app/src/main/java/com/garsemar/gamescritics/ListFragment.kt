@@ -38,10 +38,10 @@ class ListFragment : Fragment(), OnClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        api = Api()
         userAdapter = UserAdapter(getUsers(), this)
         linearLayoutManager = LinearLayoutManager(context)
 
-        api = Api()
 
         binding.recyclerView.apply {
             setHasFixedSize(true) //Optimitza el rendiment de l’app

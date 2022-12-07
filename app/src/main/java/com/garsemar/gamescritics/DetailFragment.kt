@@ -29,7 +29,7 @@ class DetailFragment : Fragment() {
         parentFragmentManager.setFragmentResultListener("Games", this
         ) { _: String, result: Bundle ->
             val result2: Game = result.get(("games")) as Game
-            binding.textView2.text = result2.name
+            binding.textView2.text = result2.id.toString()
         }
 
     }
