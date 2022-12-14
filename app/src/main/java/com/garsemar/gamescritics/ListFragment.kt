@@ -1,24 +1,22 @@
 package com.garsemar.gamescritics
 
-import android.content.ClipDescription
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import android.os.Parcelable
+import android.provider.Settings.Global
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.core.os.bundleOf
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.*
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.garsemar.gamescritics.databinding.FragmentListBinding
-import com.garsemar.gamescritics.databinding.ItemUserBinding
-import kotlinx.parcelize.Parcelize
-
-@Parcelize
-data class Game(val id: Long, var title: String, val description: String, val releaseDate: String, val rate: Double, var img: String): Parcelable
+import com.garsemar.gamescritics.api.Api
+import com.garsemar.gamescritics.databinding.*
+import com.garsemar.gamescritics.model.Result
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 lateinit var api: Api
 
@@ -36,10 +34,13 @@ class ListFragment : Fragment(), OnClickListener {
         return binding.root
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        api = Api()
-        userAdapter = UserAdapter(getUsers(), this)
+        api = Api(binding)
+        val onClickListener = this
+        userAdapter = UserAdapter(getUsers(), onClickListener)
         linearLayoutManager = LinearLayoutManager(context)
 
 
@@ -47,16 +48,24 @@ class ListFragment : Fragment(), OnClickListener {
             setHasFixedSize(true) //Optimitza el rendiment de l’app
             layoutManager = linearLayoutManager
             adapter = userAdapter
+            GlobalScope.launch {
+                while (api.myData.isEmpty()) {
+                    delay(2000)
+                }
+                activity?.runOnUiThread {
+                    adapter = UserAdapter(getUsers(), onClickListener)
+                    adapter?.notifyDataSetChanged()
+                }
+            }
         }
     }
 
-
-    private fun getUsers(): List<Game> {
+    private fun getUsers(): List<Result> {
         val games = api.getApi()
         return games
     }
 
-    override fun onClick(games: Game) {
+    override fun onClick(games: Result) {
         parentFragmentManager.setFragmentResult(
             "Games", bundleOf("games" to games)
         )
@@ -69,12 +78,12 @@ class ListFragment : Fragment(), OnClickListener {
     }
 }
 
-class UserAdapter(private val games: List<Game>, private val listener: OnClickListener): RecyclerView.Adapter<UserAdapter.ViewHolder>() {
+class UserAdapter(private val games: List<Result>, private val listener: OnClickListener): RecyclerView.Adapter<UserAdapter.ViewHolder>() {
     private lateinit var context: Context
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view){
         val binding = ItemUserBinding.bind(view)
-        fun setListener(games: Game){
+        fun setListener(games: Result){
             binding.root.setOnClickListener {
                 listener.onClick(games)
             }
@@ -92,13 +101,13 @@ class UserAdapter(private val games: List<Game>, private val listener: OnClickLi
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val game = games[position]
+        val Result = games[position]
         with(holder){
-            setListener(game)
-            binding.name.text = game.title
-            binding.order.text = game.id.toString()
+            setListener(Result)
+            binding.name.text = Result.name
+            binding.order.text = Result.id.toString()
             Glide.with(context)
-                .load(game.img)
+                .load(Result.background_image)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .centerCrop()
                 .circleCrop()
