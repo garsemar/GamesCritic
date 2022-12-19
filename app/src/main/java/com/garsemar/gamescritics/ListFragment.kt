@@ -3,7 +3,6 @@ package com.garsemar.gamescritics
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import android.provider.Settings.Global
 import androidx.fragment.app.Fragment
 import android.view.*
 import androidx.core.os.bundleOf
@@ -12,7 +11,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.garsemar.gamescritics.api.Api
 import com.garsemar.gamescritics.databinding.*
-import com.garsemar.gamescritics.model.Result
+import com.garsemar.gamescritics.model.games.Result
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -38,7 +37,7 @@ class ListFragment : Fragment(), OnClickListener {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        api = Api(binding)
+        api = Api()
         val onClickListener = this
         userAdapter = UserAdapter(getUsers(), onClickListener)
         linearLayoutManager = LinearLayoutManager(context)
@@ -50,7 +49,7 @@ class ListFragment : Fragment(), OnClickListener {
             adapter = userAdapter
             GlobalScope.launch {
                 while (api.myData.isEmpty()) {
-                    delay(2000)
+                    delay(1000)
                 }
                 activity?.runOnUiThread {
                     adapter = UserAdapter(getUsers(), onClickListener)
@@ -61,13 +60,12 @@ class ListFragment : Fragment(), OnClickListener {
     }
 
     private fun getUsers(): List<Result> {
-        val games = api.getApi()
-        return games
+        return api.getApi(binding)
     }
 
-    override fun onClick(games: Result) {
+    override fun onClick(gameId: Int) {
         parentFragmentManager.setFragmentResult(
-            "Games", bundleOf("games" to games)
+            "Result", bundleOf("gameId" to gameId)
         )
         parentFragmentManager.beginTransaction().apply {
             replace(R.id.fragmentContainerView, DetailFragment())
@@ -78,14 +76,15 @@ class ListFragment : Fragment(), OnClickListener {
     }
 }
 
-class UserAdapter(private val games: List<Result>, private val listener: OnClickListener): RecyclerView.Adapter<UserAdapter.ViewHolder>() {
+class UserAdapter(private val results: List<Result>, private val listener: OnClickListener): RecyclerView.Adapter<UserAdapter.ViewHolder>() {
     private lateinit var context: Context
+    var gameId = 1
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view){
         val binding = ItemUserBinding.bind(view)
-        fun setListener(games: Result){
+        fun setListener(gameId: Int){
             binding.root.setOnClickListener {
-                listener.onClick(games)
+                listener.onClick(gameId)
             }
         }
     }
@@ -97,17 +96,17 @@ class UserAdapter(private val games: List<Result>, private val listener: OnClick
     }
 
     override fun getItemCount(): Int {
-        return games.size
+        return results.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val Result = games[position]
+        val result = results[position]
         with(holder){
-            setListener(Result)
-            binding.name.text = Result.name
-            binding.order.text = Result.id.toString()
+            setListener(result.id)
+            binding.name.text = result.name
+            binding.order.text = result.id.toString()
             Glide.with(context)
-                .load(Result.background_image)
+                .load(result.background_image)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .centerCrop()
                 .circleCrop()

@@ -1,6 +1,7 @@
 package com.garsemar.gamescritics.api
 
-import com.garsemar.gamescritics.model.Games
+import com.garsemar.gamescritics.model.game.Game
+import com.garsemar.gamescritics.model.games.Games
 import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -24,4 +25,7 @@ interface ApiInterface {
     }
     @GET()
     fun getData(@Url url: String): Call<Games>
+
+    @GET()
+    fun getGameApi(@Url url: String): Call<Game>
 }
