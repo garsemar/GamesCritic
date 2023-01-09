@@ -6,6 +6,8 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.*
 import androidx.core.os.bundleOf
+import androidx.navigation.Navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.*
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -64,7 +66,12 @@ class ListFragment : Fragment(), OnClickListener {
     }
 
     override fun onClick(gameId: Int) {
-        parentFragmentManager.setFragmentResult(
+        val action = ListFragmentDirections.actionListFragmentToDetailFragment()
+        action.gameId = gameId
+        findNavController().navigate(action)
+
+
+        /*parentFragmentManager.setFragmentResult(
             "Result", bundleOf("gameId" to gameId)
         )
         parentFragmentManager.beginTransaction().apply {
@@ -72,7 +79,7 @@ class ListFragment : Fragment(), OnClickListener {
             setReorderingAllowed(true)
             addToBackStack(null)
             commit()
-        }
+        }*/
     }
 }
 

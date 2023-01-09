@@ -25,21 +25,23 @@ class DetailFragment : Fragment() {
 
         val api = Api()
 
-        parentFragmentManager.setFragmentResultListener("Result", this
-        ) { _: String, results: Bundle ->
-            val result: Int = results.get(("gameId")) as Int
-            binding.titleGame.text = result.toString()
-            api.getGameApi(result.toString(), binding)
-            /*binding.descGame.text = "games.name"
-            binding.dateGame.text = result[pos].released
-            binding.rateGame.text = result[pos].rating.toString()
-            Glide.with(binding.root.context)
-                .load(result[pos].background_image)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .centerCrop()
-                .circleCrop()
-                .into(binding.imageGame)*/
-        }
+        binding.titleGame.text = arguments?.getInt("gameId").toString()
+
+//        parentFragmentManager.setFragmentResultListener("Result", this
+//        ) { _: String, results: Bundle ->
+//            val result: Int = results.get(("gameId")) as Int
+//            binding.titleGame.text = result.toString()
+//            api.getGameApi(result.toString(), binding)
+//            /*binding.descGame.text = "games.name"
+//            binding.dateGame.text = result[pos].released
+//            binding.rateGame.text = result[pos].rating.toString()
+//            Glide.with(binding.root.context)
+//                .load(result[pos].background_image)
+//                .diskCacheStrategy(DiskCacheStrategy.ALL)
+//                .centerCrop()
+//                .circleCrop()
+//                .into(binding.imageGame)*/
+//        }
 
     }
 }
