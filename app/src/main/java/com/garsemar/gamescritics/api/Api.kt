@@ -14,26 +14,31 @@ import java.time.LocalDate
 
 class Api() {
     private val apiInterface = ApiInterface.create()
-    var myData: List<Result> = emptyList()
+    companion object {
+        var myData: List<Result> = emptyList()
+    }
     lateinit var myData2: Game
     @RequiresApi(Build.VERSION_CODES.O)
     fun getApi(binding: FragmentListBinding): List<Result> {
         println(LocalDate.now().minusMonths(1))
-        val call = apiInterface.getData("https://api.rawg.io/api/games?key=1ec589c6d87d4163a8edd1c1837fcbe1&dates=${LocalDate.now().minusMonths(1)},${LocalDate.now()}")
-        call.enqueue(object: Callback<Games> {
-            init {
-                binding.loading.visibility = View.VISIBLE
-            }
-            override fun onFailure(call: Call<Games>, t: Throwable) {
-                Log.e("ERROR", t.message.toString())
-            }
-            override fun onResponse(call: Call<Games?>, response: Response<Games?>) {
-                if (response.isSuccessful) {
-                    myData = response.body()!!.results
-                    binding.loading.visibility = View.GONE
+        if(myData.isEmpty()){
+            val call = apiInterface.getData("https://api.rawg.io/api/games?key=1ec589c6d87d4163a8edd1c1837fcbe1&dates=${LocalDate.now().minusMonths(1)},${LocalDate.now()}")
+            call.enqueue(object: Callback<Games> {
+                init {
+                    binding.loading.visibility = View.VISIBLE
                 }
-            }
-        })
+                override fun onFailure(call: Call<Games>, t: Throwable) {
+                    Log.e("ERROR", t.message.toString())
+                }
+                override fun onResponse(call: Call<Games?>, response: Response<Games?>) {
+                    if (response.isSuccessful) {
+                        myData = response.body()!!.results
+                        binding.loading.visibility = View.GONE
+                    }
+                }
+            })
+        }
+        println("listo")
         return myData
     }
 

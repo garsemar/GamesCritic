@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.*
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.garsemar.gamescritics.api.Api
+import com.garsemar.gamescritics.api.Api.Companion.myData
 import com.garsemar.gamescritics.databinding.*
 import com.garsemar.gamescritics.model.games.Result
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -22,6 +23,10 @@ import kotlinx.coroutines.launch
 lateinit var api: Api
 
 class ListFragment : Fragment(), OnClickListener {
+
+    companion object {
+        val games = listOf<Result>()
+    }
 
     private lateinit var userAdapter: UserAdapter
     private lateinit var linearLayoutManager: RecyclerView.LayoutManager
@@ -50,7 +55,7 @@ class ListFragment : Fragment(), OnClickListener {
             layoutManager = linearLayoutManager
             adapter = userAdapter
             GlobalScope.launch {
-                while (api.myData.isEmpty()) {
+                while (myData.isEmpty()) {
                     delay(1000)
                 }
                 activity?.runOnUiThread {
