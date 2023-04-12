@@ -16,8 +16,16 @@ class Api() {
     private val apiInterface = ApiInterface.create()
     companion object {
         var myData: List<Result> = emptyList()
+        set(myData){
+            var j = 1
+            field = myData
+            for(i in myData.indices){
+                field[i].num = j
+                j += 1
+            }
+        }
+        var myData2: Game = Game("", "", 0, "", 0.0, "")
     }
-    lateinit var myData2: Game
     @RequiresApi(Build.VERSION_CODES.O)
     fun getApi(binding: FragmentListBinding): List<Result> {
         println(LocalDate.now().minusMonths(1))
@@ -25,7 +33,9 @@ class Api() {
             val call = apiInterface.getData("https://api.rawg.io/api/games?key=1ec589c6d87d4163a8edd1c1837fcbe1&dates=${LocalDate.now().minusMonths(1)},${LocalDate.now()}")
             call.enqueue(object: Callback<Games> {
                 init {
-                    binding.loading.visibility = View.VISIBLE
+                    if (myData.isEmpty()){
+                        binding.loading.visibility = View.VISIBLE
+                    }
                 }
                 override fun onFailure(call: Call<Games>, t: Throwable) {
                     Log.e("ERROR", t.message.toString())
@@ -38,7 +48,6 @@ class Api() {
                 }
             })
         }
-        println("listo")
         return myData
     }
 
@@ -54,9 +63,11 @@ class Api() {
             override fun onResponse(call: Call<Game?>, response: Response<Game?>) {
                 if (response.isSuccessful) {
                     myData2 = response.body()!!
+                    println(myData2)
                 }
             }
         })
+        println(myData2)
         return myData2
     }
 }

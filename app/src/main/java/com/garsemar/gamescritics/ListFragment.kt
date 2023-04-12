@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.garsemar.gamescritics.api.Api
 import com.garsemar.gamescritics.api.Api.Companion.myData
+import com.garsemar.gamescritics.api.Api.Companion.myData2
 import com.garsemar.gamescritics.databinding.*
 import com.garsemar.gamescritics.model.games.Result
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -21,6 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 lateinit var api: Api
+var pos = 0
 
 class ListFragment : Fragment(), OnClickListener {
 
@@ -49,6 +51,10 @@ class ListFragment : Fragment(), OnClickListener {
         userAdapter = UserAdapter(getUsers(), onClickListener)
         linearLayoutManager = LinearLayoutManager(context)
 
+        if(myData.isNotEmpty()){
+            binding.loading.visibility = View.GONE
+        }
+
 
         binding.recyclerView.apply {
             setHasFixedSize(true) //Optimitza el rendiment de l’app
@@ -70,9 +76,10 @@ class ListFragment : Fragment(), OnClickListener {
         return api.getApi(binding)
     }
 
-    override fun onClick(gameId: Int) {
+    override fun onClick(gameId: Int, position: Int) {
         val action = ListFragmentDirections.actionListFragmentToDetailFragment()
         action.gameId = gameId
+        action.pos = position
         findNavController().navigate(action)
 
 
@@ -94,9 +101,9 @@ class UserAdapter(private val results: List<Result>, private val listener: OnCli
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view){
         val binding = ItemUserBinding.bind(view)
-        fun setListener(gameId: Int){
+        fun setListener(gameId: Int, position: Int){
             binding.root.setOnClickListener {
-                listener.onClick(gameId)
+                listener.onClick(gameId, position)
             }
         }
     }
@@ -113,10 +120,11 @@ class UserAdapter(private val results: List<Result>, private val listener: OnCli
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val result = results[position]
+        pos = position
         with(holder){
-            setListener(result.id)
+            setListener(result.id, position)
             binding.name.text = result.name
-            binding.order.text = result.id.toString()
+            binding.order.text = result.num.toString()
             Glide.with(context)
                 .load(result.background_image)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)

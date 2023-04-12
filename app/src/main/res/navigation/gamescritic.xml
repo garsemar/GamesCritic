@@ -16,6 +16,9 @@
             <argument
                 android:name="gameId"
                 android:defaultValue="0" />
+            <argument
+                android:name="pos"
+                android:defaultValue="0" />
         </action>
     </fragment>
     <fragment
@@ -24,6 +27,10 @@
         android:label="fragment_detail"
         tools:layout="@layout/fragment_detail" >
         <argument android:name="gameId"
+            app:argType="integer"
+            android:defaultValue="0" />
+        <argument
+            android:name="pos"
             app:argType="integer"
             android:defaultValue="0" />
     </fragment>

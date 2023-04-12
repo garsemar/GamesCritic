@@ -6,4 +6,5 @@ data class Result(
     val name: String,
     val rating: Double,
     val released: String,
+    var num: Int
 )
